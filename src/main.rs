@@ -1,18 +1,25 @@
 #![allow(unused)]
 
+// region: -- deps
+
 use axum::{
-    Router,
+    Router, ServiceExt,
     extract::{Path, Query},
+    http::StatusCode,
     response::{Html, IntoResponse},
-    routing::get,
+    routing::{get, get_service},
     serve::Listener,
 };
 use serde::Deserialize;
 use tokio::net::TcpListener;
+use tower_http::services::ServeDir;
+// endregion: -- deps
 
 #[tokio::main]
 async fn main() {
-    let routes_all = Router::new().merge(routes_hello());
+    let routes_all = Router::new()
+        .merge(routes_hello())
+        .fallback_service(get_service(ServeDir::new("public"))); // to serve static data
 
     // region:    --- Start Server
     let addr = "127.0.0.1:8080";
