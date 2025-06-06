@@ -1,23 +1,42 @@
 #![allow(unused)]
 
-use std::net::SocketAddr;
-
-use axum::{response::Html, routing::get, serve::Listener, Router};
+use axum::{
+    Router,
+    extract::Query,
+    response::{Html, IntoResponse},
+    routing::get,
+    serve::Listener,
+};
+use serde::Deserialize;
 use tokio::net::TcpListener;
 
 #[tokio::main]
 async fn main() {
-    let routes_hello = Router::new().route(
-        "/hello",
-        get(|| async { Html("Hello <strong> World!! </strong>") }),
-    );
+    let routes_hello = Router::new().route("/hello", get(handler_hello));
 
-    // #region -- Start Server
+    // region:    --- Start Server
     let addr = "127.0.0.1:8080";
     let listner = TcpListener::bind(addr).await.unwrap();
     println!("->> LISTENING on {addr}\n");
 
-    axum::serve(listner,routes_hello.into_make_service()).await.unwrap();
-
-    // #endregion
+    axum::serve(listner, routes_hello.into_make_service())
+        .await
+        .unwrap();
+    // endregion: --- Start Server
 }
+
+// region: --- Handler Hello
+
+#[derive(Debug, Deserialize)]
+struct HelloParams {
+    name: Option<String>,
+}
+
+async fn handler_hello(Query(params): Query<HelloParams>) -> impl IntoResponse {
+    println!("->> {:<12} - handler_hello - {params:?}", "HANDLER");
+
+    let name = params.name.as_deref().unwrap_or("World!");
+
+    Html(format!("Hello <strong> {name} </strong>"))
+}
+// endregion: --- Handler Hello
