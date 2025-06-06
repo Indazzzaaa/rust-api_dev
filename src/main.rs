@@ -13,12 +13,18 @@ use axum::{
 use serde::Deserialize;
 use tokio::net::TcpListener;
 use tower_http::services::ServeDir;
+
+mod error;
+mod web;
+
+pub use self::error::{Error, Result};
 // endregion: -- deps
 
 #[tokio::main]
 async fn main() {
     let routes_all = Router::new()
         .merge(routes_hello())
+        .merge(web::routes_login::routes())
         .fallback_service(get_service(ServeDir::new("public"))); // to serve static data
 
     // region:    --- Start Server
