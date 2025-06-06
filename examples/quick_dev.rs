@@ -9,6 +9,7 @@ async fn main() -> Result<()> {
     let hc = httpc_test::new_client(base_url)?;
 
     // hc.do_get("/test.txt").await?.print().await?;
+    hc.do_get("/hello").await?.print().await?;
 
     let req_log = hc.do_post(
         "/api/login",

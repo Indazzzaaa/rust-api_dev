@@ -6,7 +6,8 @@ use axum::{
     Router, ServiceExt,
     extract::{Path, Query},
     http::StatusCode,
-    response::{Html, IntoResponse},
+    middleware,
+    response::{Html, IntoResponse, Response},
     routing::{get, get_service},
     serve::Listener,
 };
@@ -25,6 +26,7 @@ async fn main() {
     let routes_all = Router::new()
         .merge(routes_hello())
         .merge(web::routes_login::routes())
+        .layer(middleware::map_response(main_response_mapper))
         .fallback_service(get_service(ServeDir::new("public"))); // to serve static data
 
     // region:    --- Start Server
@@ -67,3 +69,15 @@ async fn hanlder_hello2(Path(name): Path<String>) -> impl IntoResponse {
     Html(format!("Hello <strong> {name} </strong>"))
 }
 // endregion: --- Routes Hello
+
+// region: -- Response mapper
+
+async fn main_response_mapper(res: Response) -> Response {
+    println!("->> {:12} - main_response_mapper", "RES_MAPPER");
+
+    // extra line for showing better request flow in debug logs
+    println!();
+    res
+}
+
+// endregion: -- Response mapper
