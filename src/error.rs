@@ -1,12 +1,18 @@
-use axum::{
-    http::StatusCode,
-    response::{IntoResponse, Response},
-};
+use axum::{ http::StatusCode, response::{ IntoResponse, Response } };
 
 pub type Result<T> = core::result::Result<T, Error>;
 #[derive(Debug)]
 pub enum Error {
     LoginFail,
+
+    // -- Auth errors.
+    AuthFailNoAuthTokenCookie,
+    AuthFailTokenWrongFormat,
+
+    // -- Model errors
+    TicketDeleteFailIdNotFound {
+        id: u64,
+    },
 }
 
 impl IntoResponse for Error {
